@@ -1,0 +1,22 @@
+{
+  "manifest_version": 2,
+  "name": "Toggle Design Mode",
+  "version": "1.0",
+  "description": "Turn on design mode and set caret position",
+  "permissions": ["activeTab", "tabs", "http://*/*", "https://*/*"],
+  "background": {
+    "scripts": ["background.js"]
+  },
+  "browser_action": {
+    "default_icon": "off.png",
+    "default_title": "Toggle Design Mode"
+  },
+  "commands": {
+    "trigger-execution": {
+      "suggested_key": {
+        "default": "Ctrl+Shift+Y"
+      },
+      "description": "Toggle design mode"
+    }
+  }
+}
