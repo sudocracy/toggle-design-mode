@@ -2,7 +2,7 @@
 
     function run() {
 
-        function log() {
+        function logCurrentState() {
 
             console.log('[TOGGLE-DESIGN-MODE]| document.designMode:', document.designMode);
             console.log('[TOGGLE-DESIGN-MODE]| document.body.style.caretColor:', document.body.style.caretColor);
@@ -34,21 +34,23 @@
         function toggleDesignMode() {
 
             document.designMode = document.designMode === 'on' ? 'off' : 'on';
+
+            return isDesignModeOn();
         }
 
         function main() {
 
-            log();
+            logCurrentState();
 
-            toggleDesignMode();
+            const isDesignModeOn = toggleDesignMode();
 
-            changeCaretColor(isDesignModeOn());
+            changeCaretColor(isDesignModeOn);
 
-            isDesignModeOn() && moveCaretToMiddle();
+            isDesignModeOn && moveCaretToMiddle();
 
-            log();
+            logCurrentState();
 
-            return isDesignModeOn();
+            return isDesignModeOn;
         }
 
         return main();
@@ -65,33 +67,44 @@
 
         function triggerExecution() {
 
+            function successHander(results) {
+
+                const isError = results?.[0] === undefined;
+                const isDesignModeOn = !isError && results[0] === true;
+    
+                log(`Return Value: ${isDesignModeOn}`, isError); 
+                
+                toggleIcon(isDesignModeOn);    
+            }
+    
+            function errorHandler(error) {
+    
+                log(error, true);
+            }
+
             browser.tabs.executeScript({ code: `(${run})()` })
                         .then(successHander)
                         .catch(errorHandler);
         }
 
-        function successHander(results) {
-
-            const isError = ! results.every((result) => result === true);
-            const isDesignModeOn = !isError && results[0] !== undefined && results[0] === true;
-
-            log(results, isError); 
-            toggleIcon(isDesignModeOn);
-
-        }
-
-        function errorHandler(error) {
-
-            log(error, true);
-        }
 
         function toggleIcon(isDesignModeOn) {
                 
             const correctIcon = isDesignModeOn ? 'on.png' : 'off.png';
 
+            const errorHandler = (error) => {
+                
+                log(`Unable to set icon to ${correctIcon}. Error: ${error.message}. Stack: ${error.stack}`);
+            }
+
+            const successHander = () => {
+
+                log(`Icon set to ${correctIcon}`)
+            }
+
             browser.browserAction.setIcon({ path: correctIcon })
-                                 .then(log(`Icon set to ${correctIcon}`))
-                                 .catch(log(`Unable to set icon to ${correctIcon}`));
+                                 .then(successHander)
+                                 .catch(errorHandler);
             
         }
 
